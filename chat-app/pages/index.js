@@ -1,42 +1,68 @@
 // pages/index.js
-import React, { useState } from 'react';
-import Head from 'next/head';
-import Login from '../components/Login';
-import Chat from '../components/Chat';
-import GeminiChat from '../components/GeminiChat';
-import styles from '../styles/Home.module.css';
+import { useState } from 'react';
+import Router from 'next/router';
 
-function Home() {
+const Index = () => {
   const [username, setUsername] = useState('');
-  const [room, setRoom] = useState('');
-  const [showChat, setShowChat] = useState(false);
+  const [role, setRole] = useState('student'); // Default role
 
-  const handleLogin = ({ username, room }) => {
-    setUsername(username);
-    setRoom(room);
-    setShowChat(true);
+  const handleLogin = async (e) => {
+    e.preventDefault();
+
+    try {
+      const response = await fetch('/api/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ username, role }),
+      });
+
+      if (response.ok) {
+        const { user } = await response.json();
+        console.log('Logged in:', user);
+
+        // Redirect based on role
+        if (role === 'student') {
+          Router.push({
+            pathname: '/student',
+            query: { username }, // Pass username as query parameter
+          });
+        } else if (role === 'expert') {
+          Router.push({
+            pathname: '/expert',
+            query: { username }, // Pass username as query parameter
+          });
+        }
+      } else {
+        console.error('Login failed');
+      }
+    } catch (error) {
+      console.error('Login error:', error);
+    }
   };
 
   return (
-    <div className={styles.container}>
-      <Head>
-        <title>Chat App</title>
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
-
-      {!showChat ? (
-        <div className={styles.loginContainer}>
-          <h1>Welcome to Chat App</h1>
-          <Login onLogin={handleLogin} />
-        </div>
-      ) : (
-        <div className={styles.chatContainer}>
-          <Chat username={username} room={room} />
-          <GeminiChat />
-        </div>
-      )}
+    <div>
+      <h1>Login Page</h1>
+      <form onSubmit={handleLogin}>
+        <label>
+          Username:
+          <input type="text" value={username} onChange={(e) => setUsername(e.target.value)} />
+        </label>
+        <br />
+        <label>
+          Role:
+          <select value={role} onChange={(e) => setRole(e.target.value)}>
+            <option value="student">Student</option>
+            <option value="expert">Expert</option>
+          </select>
+        </label>
+        <br />
+        <button type="submit">Login</button>
+      </form>
     </div>
   );
-}
+};
 
-export default Home;
+export default Index;
