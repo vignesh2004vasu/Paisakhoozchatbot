@@ -6,15 +6,6 @@ const dotenv = require('dotenv');
 const cors = require('cors');
 const { getMessagesByRoom, saveMessage } = require('./controllers/chatController');
 
-const app = express();
-const server = http.createServer(app);
-const io = socketIo(server, {
-  cors: {
-    origin: "*",
-    methods: ["GET", "POST"]
-  }
-});
-
 dotenv.config();
 const PORT = process.env.PORT || 5000;
 const MONGO_URI = process.env.MONGO_URI;
@@ -27,17 +18,27 @@ mongoose.connect(MONGO_URI, {
 .then(() => console.log('MongoDB connected'))
 .catch(err => console.error('MongoDB connection error:', err));
 
+const app = express();
+const server = http.createServer(app);
+
 // Middleware
 app.use(cors());
 
 // WebSocket communication
+const io = socketIo(server, {
+  cors: {
+    origin: "*",
+    methods: ["GET", "POST"]
+  }
+});
+
 io.on('connection', socket => {
   console.log('New client connected:', socket.id);
 
   socket.on('joinRoom', room => {
     socket.join(room);
     console.log(`Socket ${socket.id} joined room ${room}`);
-    // Fetch and emit last 10 messages for the room
+    // Example: Fetch and emit last 10 messages for the room
     getMessagesByRoom({ params: { room } }, { json: messages => {
       socket.emit('initMessages', messages);
     } });
@@ -61,9 +62,5 @@ io.on('connection', socket => {
   });
 });
 
-// Routes for user authentication
-app.use('/api/auth', require('./routes/auth'));
 
-server.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
-});
+
