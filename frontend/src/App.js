@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import io from 'socket.io-client';
 
-
-const BACKEND_WS_URL = 'ws://54.197.38.210:5000'; // Replace with your backend's WebSocket URL
+const BACKEND_WS_URL = 'wss://54.197.38.210:5000'; // Use wss:// for secure WebSocket
 
 const socket = io(BACKEND_WS_URL, {
   transports: ['websocket'],
 });
+
 const App = () => {
   const [username, setUsername] = useState('');
   const [room, setRoom] = useState('');
