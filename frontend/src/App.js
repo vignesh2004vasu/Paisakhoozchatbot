@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import io from 'socket.io-client';
 
-const ENDPOINT = 'http://localhost:5000';
+const ENDPOINT = 'http://54.197.38.210:5000'; // Replace with your backend's public IP and port
 const socket = io(ENDPOINT, {
   transports: ['websocket', 'polling'], // Ensure proper transport methods
-  withCredentials: true,
+  withCredentials: true, // Optional: if using sessions or authentication
 });
 
 const App = () => {
@@ -14,29 +14,35 @@ const App = () => {
   const [messages, setMessages] = useState([]);
 
   useEffect(() => {
+    // Initial setup when component mounts
     socket.on('initMessages', (messages) => {
       setMessages(messages);
     });
 
+    // New message received
     socket.on('message', (message) => {
       setMessages(prevMessages => [...prevMessages, message]);
     });
 
+    // Handle connection errors
     socket.on('connect_error', (err) => {
       console.error('Connection error:', err.message);
     });
 
+    // Clean up socket connection on component unmount
     return () => {
       socket.disconnect();
     };
   }, []);
 
+  // Joining a room
   const handleJoinRoom = () => {
     if (username && room) {
       socket.emit('joinRoom', room);
     }
   };
 
+  // Sending a message
   const handleSendMessage = () => {
     if (messageInput.trim() !== '') {
       socket.emit('chatMessage', { room, username, message: messageInput });
