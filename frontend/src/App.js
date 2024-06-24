@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import io from 'socket.io-client';
 
-const BACKEND_WS_URL = 'ws://54.197.38.210:5000'; // Use wss:// for secure WebSocket
+const BACKEND_WS_URL = 'ws://44.205.252.152:5000/'; // Use wss:// for secure WebSocket
 
 const socket = io(BACKEND_WS_URL, {
   transports: ['websocket'],
